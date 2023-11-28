@@ -1,4 +1,4 @@
-import db_adapter
+import src.db.db_adapter as db_adapter
 import data_validation
 
 class RequestMediator():

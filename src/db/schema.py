@@ -13,10 +13,12 @@ Base = declarative_base()
 class Org(Base):
     __tablename__ = 'orgs'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    name = Column(String(50), unique=True, nullable=False)
+    id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    name        = Column(String(50), unique=True, nullable=False)
     description = Column(Text, nullable=False)
-    password = Column(String(64), nullable=False)
+    password    = Column(String(64), nullable=False)
+
+    crops = relationship('Crop', cascade='all, delete-orphan')
 
     def save(self, session):
         passlen = len(self.password)
@@ -44,7 +46,9 @@ class Crop(Base):
     coordinate_latitude = Column(Float, nullable=False)
     coordinate_longitude = Column(Float, nullable=False)
 
-    org = relationship('Org', back_populates='crops')
+    conditions = relationship('Condition', cascade='all, delete-orphan')
+    actuators = relationship('Actuator', cascade='all, delete-orphan')
+    measurements = relationship('Measurement', cascade='all, delete-orphan')
 
     def __str__(self):
         return f"{self.name}"
@@ -124,6 +128,30 @@ class Measurement(Base):
     def __str__(self):
         return f"{self.value}.{self.variable}.{self.crop}"
 
+class User(Base):
+    __tablename__ = 'users'
+
+    id       = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    username = Column(String(50), unique=True, nullable=False)
+    password = Column(String(64), nullable=False)
+
+    def save(self, session):
+        passlen = len(self.password)
+        numbers = sum(c.isdigit() for c in self.password)
+        letters = sum(c.isalpha() for c in self.password)
+        spaces = sum(c.isspace() for c in self.password)
+
+        hash_str = f"{self.password}.{passlen}.{letters}.{spaces}"
+        hash_value = hashlib.sha256(hash_str.encode("utf-8")).hexdigest()
+
+        self.password = hash_value
+
+        session.add(self)
+        session.commit()
+
+    def __str__(self):
+        return f"{self.username}"
+
 class Permission(Base):
     __tablename__  = 'permissions'
     __table_args__ = (UniqueConstraint('user_id', 'org_id', 'crop_id', name='_user_org_crop_permission_uc'),)
@@ -162,36 +190,23 @@ class Permission(Base):
         session.commit()
 
 if __name__ == '__main__':
+    
+    import os
+    from dotenv import load_dotenv
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/arqueotipo')
+    load_dotenv()
+
+    database = os.getenv('DB_NAME')
+    host     = os.getenv('DB_HOST')
+    port     = os.getenv('DB_PORT')
+    user     = os.getenv('DB_USER')
+    password = os.getenv('DB_PASSWORD')
+    url      = f'postgresql://{user}:{password}@{host}:{port}/{database}'
+
+
+    engine = create_engine(url)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-
-    #org = Org(name='org1', description='desc1', password='pass1')
-    #org.save(session)
-
-    #crop = Crop(org_id='1', name='crop1', coordinate_latitude=1.0, coordinate_longitude=1.0)
-    #crop.save(session)
-
-    #variable = Variable(name='var1', units='unit1', description='desc1')
-    #variable.save(session)
-
-    #condition = Condition(crop_id='1', variable_id='1', min_value=1.0, max_value=1.0)
-    #condition.save(session)
-
-    #actuator_type = ActuatorType(name='actuator_type1', description='desc1')
-    #actuator_type.save(session)
-
-    #actuator = Actuator(name='actuator1', mqtt_topic='topic1', crop_id='1', actuator_type_id='1', start_time='00:00:00', end_time='00:00:00')
-    #actuator.save(session)
-
-    #measurement = Measurement(crop_id='1', value=1.0, variable_id='1')
-    #measurement.save(session)
-
-    #permission = Permission(user_id='1', org_id='1', crop_id='1', granted=True, permission_type='admin')
-    #permission.save(session)
-
-    #session.close()
