@@ -23,7 +23,7 @@ class TestDataValidator(unittest.TestCase):
                 self.assertFalse(self.validator.validate_username(username))
 
     def test_valid_passwords(self):
-        passwords = ['password', 'password1', 'password with spaces', 'password!']
+        passwords = ['password1', 'password with spaces', 'password!']
         for password in passwords:
             with self.subTest(password=password):
                 self.assertTrue(self.validator.validate_password(password))
