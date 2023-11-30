@@ -1,8 +1,13 @@
+import os
+import sys
 import unittest
-from data_validator import DataValidator
+parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(parentdir)
 
-class TestDataValidator:
-    def setup(self):
+from src.data_validator import DataValidator
+
+class TestDataValidator(unittest.TestCase):
+    def setUp(self):
         self.validator = DataValidator()
 
     def test_valid_usernames(self):

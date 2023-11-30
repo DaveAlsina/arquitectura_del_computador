@@ -1,4 +1,4 @@
-import data_validation
+import data_validator
 from db import db_adapter
 
 class RequestMediator():
@@ -6,7 +6,7 @@ class RequestMediator():
     def __init__(self) -> None:
         print("RequestMediator: Inicializando...")
         self.adapter = db_adapter.DatabaseAdapter()
-        self.data_validator = data_validation.DataValidator()
+        self.data_validator = data_validator.DataValidator()
 
     def log_in(self, user: str, password: str):
         print(f"RequestMediator: log_in user: {user}, password: {password}")
