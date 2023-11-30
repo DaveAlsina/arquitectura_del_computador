@@ -8,7 +8,7 @@ sys.path.append(parentdir)
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.db import Org, Crop, Variable, Condition, ActuatorType, Actuator, Measurement, User, Permission, Base
+from src.db import Org, Crop, Variable, Condition, ActuatorType, Actuator, Measurement, User, Permission, Base, create_engine_with_retry
 
 load_dotenv()
 database = os.getenv('DB_NAME')
@@ -21,6 +21,7 @@ url = f'postgresql://{user}:{password}@{host}:{port}/{database}'
 class TestModelInserts(unittest.TestCase):
     def setUp(self):
         # Set up the database connection
+        #engine = create_engine_with_retry(url)
         engine = create_engine(url)
         self.Session = sessionmaker(bind=engine)
         self.session = self.Session()
@@ -89,7 +90,6 @@ class TestModelInserts(unittest.TestCase):
         retrieved_user = self.session.query(User).filter_by(username='user1').first()
         self.assertEqual(retrieved_user.username, 'user1')
 
-    
 
 
 if __name__ == '__main__':
