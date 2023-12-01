@@ -1,4 +1,4 @@
-#Data Registration Module
+# Data Registration Module
 
 This Python code defines a RESTful API using the FastAPI module. The API handles various endpoints for managing organizations, variables, users, zones, and measurements. It also utilizes a `RequestMediator` to handle requests and interact with the underlying data storage.
 
