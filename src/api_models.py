@@ -10,6 +10,7 @@ app = fapi.FastAPI()
 # Pydantic models
 class User(BaseModel):
     username: str
+    email: str
     password: str
 
 class Zone(BaseModel):
@@ -18,7 +19,5 @@ class Zone(BaseModel):
 class Measurement(BaseModel):
     zone: str
     value: float
-
-
 
 
