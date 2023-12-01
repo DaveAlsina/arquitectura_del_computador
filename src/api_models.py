@@ -14,10 +14,24 @@ class User(BaseModel):
     password: str
 
 class Zone(BaseModel):
+    org_id: str
     name: str
+    latitude: float
+    longitude: float
 
 class Measurement(BaseModel):
-    zone: str
+    variable_id: str
+    crop_id: str
+    datetime: str
     value: float
 
+class Organization(BaseModel):
+    name: str
+    description: str
+    password: str
+
+class Variable(BaseModel):
+    name: str
+    units: str
+    description: str
 
