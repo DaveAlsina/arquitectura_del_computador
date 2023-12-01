@@ -25,6 +25,7 @@ class TestModelInserts(unittest.TestCase):
         engine = create_engine(url)
         self.Session = sessionmaker(bind=engine)
         self.session = self.Session()
+        Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
 
     def tearDown(self):
@@ -84,7 +85,7 @@ class TestModelInserts(unittest.TestCase):
         self.assertEqual(retrieved_condition.crop_id, crop.id)
 
     def test_user_model(self):
-        user = User(username='user1', password='pass1')
+        user = User(username='user1', password='pass1', email='email1@email.com')
         user.save(self.session)
 
         retrieved_user = self.session.query(User).filter_by(username='user1').first()
