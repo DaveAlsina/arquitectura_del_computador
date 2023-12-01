@@ -1,3 +1,4 @@
+import os
 import uuid
 import hashlib
 
@@ -7,6 +8,13 @@ from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import UUID, TIME
 #from sqlalchemy.ext.declarative import declared_attr
 #from sqlalchemy_utils import ChoiceType
+
+# used to load environment variables from .env and establish database connection
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import OperationalError
+from tenacity import retry, stop_after_delay, wait_fixed
 
 Base = declarative_base()
 
@@ -189,24 +197,36 @@ class Permission(Base):
         session.add(self)
         session.commit()
 
-if __name__ == '__main__':
-    
-    import os
-    from dotenv import load_dotenv
-    from sqlalchemy import create_engine
-    from sqlalchemy.orm import sessionmaker
 
-    load_dotenv()
+# Define a SQLAlchemy engine with retry mechanism
+@retry(stop=stop_after_delay(40), wait=wait_fixed(5))
+def create_engine_with_retry(db_url: str):
+    try:
+        engine = create_engine(db_url)
+        # Test the connection
+        engine.connect()
+        return engine
+    except OperationalError as e:
+        print(f"Error connecting to the database: {e}")
+        raise
 
-    database = os.getenv('DB_NAME')
-    host     = os.getenv('DB_HOST')
-    port     = os.getenv('DB_PORT')
-    user     = os.getenv('DB_USER')
-    password = os.getenv('DB_PASSWORD')
-    url      = f'postgresql://{user}:{password}@{host}:{port}/{database}'
-
-
-    engine = create_engine(url)
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+#if __name__ == '__main__':
+#
+#    load_dotenv()
+#
+#    database = os.getenv('DB_NAME')
+#    host     = os.getenv('DB_HOST')
+#    port     = os.getenv('DB_PORT')
+#    user     = os.getenv('DB_USER')
+#    password = os.getenv('DB_PASSWORD')
+#    url      = f'postgresql://{user}:{password}@{host}:{port}/{database}'
+#
+#
+#    #engine = create_engine(url)
+#    engine = create_engine_with_retry(url)
+#
+#    Base.metadata.create_all(engine)
+#    Session = sessionmaker(bind=engine)
+#    session = Session()
+#    session.commit()
+#    session.close()
