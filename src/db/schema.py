@@ -51,7 +51,7 @@ class Crop(Base):
     id      = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     org_id  = Column(UUID(as_uuid=True), ForeignKey('orgs.id'), nullable=False)
     name    = Column(String(50), nullable=False)
-    coordinate_latitude = Column(Float, nullable=False)
+    coordinate_latitude  = Column(Float, nullable=False)
     coordinate_longitude = Column(Float, nullable=False)
 
     conditions = relationship('Condition', cascade='all, delete-orphan')
@@ -140,6 +140,7 @@ class User(Base):
     __tablename__ = 'users'
 
     id       = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    email    = Column(String(50), unique=True, nullable=False)
     username = Column(String(50), unique=True, nullable=False)
     password = Column(String(64), nullable=False)
 
@@ -225,6 +226,7 @@ def create_engine_with_retry(db_url: str):
 #    #engine = create_engine(url)
 #    engine = create_engine_with_retry(url)
 #
+#    Base.metadata.drop_all(engine)
 #    Base.metadata.create_all(engine)
 #    Session = sessionmaker(bind=engine)
 #    session = Session()
